@@ -9,11 +9,15 @@
 	{
 		public function Initialize()
 		{
+			$this->AddInPort('Value', new BooleanPort());
 			$this->AddOutPort('Value', new BooleanPort());
 		}
 
 		public function Execute()
 		{
+			$Value = $this->GetInput('Value');
+			$this->SetOutput('Value', $Value);
+
 			return true;
 		}
 	}

@@ -9,11 +9,15 @@
 	{
 		public function Initialize()
 		{
+			$this->AddInPort('Value', new IntegerPort());
 			$this->AddOutPort('Value', new IntegerPort());
 		}
 
 		public function Execute()
 		{
+			$Value = $this->GetInput('Value');
+			$this->SetOutput('Value', $Value);
+
 			return true;
 		}
 	}

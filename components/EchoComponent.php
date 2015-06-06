@@ -21,7 +21,10 @@
 			catch (\Exception $Exception)
 			{
 				$this->AddError("Unable to echo the value.");
+				return false;
 			}
+
+			return true;
 		}
 	}
 
