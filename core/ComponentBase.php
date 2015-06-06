@@ -30,6 +30,20 @@
 		 */
 		protected $_IsStateful = true;
 
+		/**
+		 * Tells whether the component has been executed.
+		 *
+		 * @var bool
+		 */
+		protected $_IsExecuted = false;
+
+		/**
+		 * Tells if the component is currently running.
+		 *
+		 * @var bool
+		 */
+		protected $_IsRunning = false;
+
 		public function SetName($ComponentName)
 		{
 			if (!is_string($ComponentName) && !is_integer($ComponentName)) {
@@ -70,6 +84,16 @@
 			}
 
 			return $this->_OutPorts[$PortName] instanceof PortInterface;
+		}
+
+		public function GetInPorts()
+		{
+			return $this->_InPorts;
+		}
+
+		public function GetOutPorts()
+		{
+			return $this->_OutPorts;
 		}
 
 		protected function AddInPort($PortName, PortInterface $Port)
@@ -151,8 +175,32 @@
 			return true;
 		}
 
+		public function IsExecuted($IsExecuted = null)
+		{
+			if ($IsExecuted === null) {
+				return $this->_IsExecuted;
+			}
+
+			$this->_IsExecuted = (bool) $IsExecuted;
+
+			return true;
+		}
+
+		public function IsRunning($IsRunning = null)
+		{
+			if ($IsRunning === null) {
+				return $this->_IsRunning;
+			}
+
+			$this->_IsRunning = (bool) $IsRunning;
+
+			return true;
+		}
+
 		public function ResetComponent()
 		{
+			$this->IsRunning(false);
+			$this->IsExecuted(false);
 			$this->ResetPorts();
 
 			return true;
