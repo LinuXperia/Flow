@@ -1,0 +1,55 @@
+{
+  "Graph": {
+    "Name": "AdditionTest",
+    "Nodes": [
+      {
+        "Name": "Float1",
+        "Component": "Flow\\Components\\FloatComponent",
+        "Inputs": [
+          {
+            "Name": "Value",
+            "Value": "25"
+          }
+        ]
+      },
+      {
+        "Name": "Float2",
+        "Component": "Flow\\Components\\FloatComponent",
+        "Inputs": [
+          {
+            "Name": "Value",
+            "Value": "10"
+          }
+        ]
+      },
+      {
+        "Name": "Addition1",
+        "Component": "Flow\\Components\\AdditionComponent"
+      },
+      {
+        "Name": "Echo1",
+        "Component": "Flow\\Components\\EchoComponent"
+      }
+    ],
+    "Connections": [
+      {
+        "OutputNode": "Float1",
+        "OutputPort": "Value",
+        "InputNode": "Addition1",
+        "InputPort": "Values"
+      },
+      {
+        "OutputNode": "Float2",
+        "OutputPort": "Value",
+        "InputNode": "Addition1",
+        "InputPort": "Values"
+      },
+      {
+        "OutputNode": "Addition1",
+        "OutputPort": "Value",
+        "InputNode": "Echo1",
+        "InputPort": "Text"
+      }
+    ]
+  }
+}
