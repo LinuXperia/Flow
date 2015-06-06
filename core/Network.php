@@ -135,14 +135,22 @@
 				$this->OutConnections[$OutNodeName] = array();
 			}
 
-			$this->InConnections[$InNodeName][$InPortName] = array(
+			if (!isset($this->InConnections[$InNodeName][$InPortName])) {
+				$this->InConnections[$InNodeName][$InPortName] = array();
+			}
+
+			if (!isset($this->OutConnections[$OutNodeName][$OutPortName])) {
+				$this->OutConnections[$OutNodeName][$OutPortName] = array();
+			}
+
+			$this->InConnections[$InNodeName][$InPortName][] = array(
 				'OutNode' => $OutNodeName,
 				'OutPort' => $OutPortName,
 				'InNode'  => $InNodeName,
 				'InPort'  => $InPortName
 			);
 
-			$this->OutConnections[$OutNodeName][$OutPortName] = array(
+			$this->OutConnections[$OutNodeName][$OutPortName][] = array(
 				'OutNode' => $OutNodeName,
 				'OutPort' => $OutPortName,
 				'InNode'  => $InNodeName,
@@ -168,7 +176,7 @@
 		/**
 		 * @return ComponentInterface|null
 		 */
-		protected function GetFirstNode()
+		protected function &GetFirstNode()
 		{
 			$Node = null;
 			if (isset($this->Nodes[$this->CurrentNode])) {
@@ -183,38 +191,79 @@
 		 *
 		 * @return ComponentInterface|null
 		 */
-		public function GetNextNode(ComponentInterface $CurrentNode)
+		public function &GetNextNode(ComponentInterface $CurrentNode)
 		{
+			// Check the input connections of the current node to
 			if (isset($this->OutConnections[$CurrentNode->GetName()])) {
-				$Connection = current($this->OutConnections[$CurrentNode->GetName()]);
-				next($this->OutConnections[$CurrentNode->GetName()]);
+				$Connections = current($this->OutConnections[$CurrentNode->GetName()]);
 
-				if (isset($Connection['InNode'])) {
-					return $this->Nodes[$Connection['InNode']];
+				foreach (array_values($Connections) as $Connection) {
+					if (isset($Connection['InNode']) && $this->Nodes[$Connection['InNode']]) {
+						if (!$this->Nodes[$Connection['InNode']]->IsExecuted() && !$this->Nodes[$Connection['InNode']]->IsRunning()) {
+							return $this->Nodes[$Connection['InNode']];
+						}
+					}
 				}
 			}
 
-			return null;
+			$Null = null;
+
+			return $Null;
 		}
 
-		public function Execute(ComponentInterface $Node = null)
+		public function TransferConnections(ComponentInterface &$Node)
+		{
+			if (isset($this->InConnections[$Node->GetName()])) {
+				foreach (array_values($this->InConnections[$Node->GetName()]) as $Connections) {
+					foreach (array_values($Connections) as $Connection) {
+						if (!$this->Nodes[$Connection['OutNode']]->IsExecuted()) {
+							if ($this->Nodes[$Connection['OutNode']]->IsRunning()) {
+								break;
+							}
+
+							$this->Execute($this->Nodes[$Connection['OutNode']]);
+						}
+
+						$Output = $this->Nodes[$Connection['OutNode']]->GetOutput($Connection['OutPort']);
+						$Node->SetInput($Connection['InPort'], $Output);
+					}
+				}
+			}
+
+			return $Node;
+		}
+
+		public function Execute(ComponentInterface &$Node = null)
 		{
 			if ($Node === null) {
 				$Node = $this->GetFirstNode();
 			}
 
 			if ($Node !== null) {
-				if (isset($this->InConnections[$Node->GetName()])) {
-					foreach (array_values($this->InConnections[$Node->GetName()]) as $Connection) {
-						$Output = $this->Nodes[$Connection['OutNode']]->GetOutput($Connection['OutPort']);
-						$Node->SetInput($Connection['InPort'], $Output);
+				if (!$Node->IsRunning()) {
+
+					if (!$Node->IsExecuted()) {
+
+						$Node->IsRunning(true);
+
+						$Node = $this->TransferConnections($Node);
+
+						$Node->Execute();
+
+						$Node->IsRunning(false);
+
+						$Node->IsExecuted(true);
 					}
 				}
 
-				$Node->Execute();
-
 				if (($NextNode = $this->GetNextNode($Node)) !== null) {
-					$this->Execute($NextNode);
+					if (!$NextNode->IsRunning()) {
+						$this->Execute($NextNode);
+					}
+				}
+
+				if (!$Node->IsStateful()) {
+					$Node->ResetComponent();
 				}
 			}
 
