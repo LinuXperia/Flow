@@ -1,0 +1,29 @@
+{
+  "Graph": {
+    "Name": "FlowDefault",
+    "Nodes": [
+      {
+        "Name": "Text1",
+        "Component": "Flow\\Components\\StringComponent",
+        "Inputs": [
+          {
+            "Name": "Text",
+            "Value": "Hello World!"
+          }
+        ]
+      },
+      {
+        "Name": "Echo1",
+        "Component": "Flow\\Components\\EchoComponent"
+      }
+    ],
+    "Connections": [
+      {
+        "OutputNode": "Text1",
+        "OutputPort": "Text",
+        "InputNode": "Echo1",
+        "InputPort": "Text"
+      }
+    ]
+  }
+}
