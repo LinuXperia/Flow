@@ -6,7 +6,11 @@
 
 	require_once(FLOW_REL_PATH.'core/Bootstrap.php');
 
-	if (($Network = Flow\Core\Network::GetInstance('FlowDefault')) === false) {
+	if (!isset($_REQUEST['Flow'])) {
+		$_REQUEST['Flow'] = 'FlowDefault';
+	}
+
+	if (($Network = Flow\Core\Network::GetInstance($_REQUEST['Flow'])) === false) {
 		die("Unable to load the graph.");
 	}
 
