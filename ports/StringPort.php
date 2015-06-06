@@ -27,10 +27,6 @@
 
 		public function GetValue()
 		{
-			if (!is_string($this->Value)) {
-				return null;
-			}
-
 			return $this->Value;
 		}
 
